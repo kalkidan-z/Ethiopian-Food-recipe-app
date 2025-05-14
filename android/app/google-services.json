@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "363848643281",
+    "project_id": "mesob-cefdd",
+    "storage_bucket": "mesob-cefdd.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:363848643281:android:d8cfc7095421db08438bf0",
+        "android_client_info": {
+          "package_name": "com.example.flutter_application_1"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD5ruxMR9JpazD8opku3SANsMY_C__DyVg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
