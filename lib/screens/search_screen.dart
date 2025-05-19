@@ -1,3 +1,4 @@
+
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/models/recipe.dart';
 import 'package:flutter_application_1/screens/recipe_detail_screen.dart';
@@ -121,3 +122,4 @@ class _SearchScreenState extends State<SearchScreen> {
     );
   }
 }
+
