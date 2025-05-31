@@ -3,7 +3,7 @@ import 'package:flutter/foundation.dart';
 class Recipe {
   final String id;
   final String name;
-  final String category; // Changed to String
+  final String category;
   final String imageUrl;
   final String description;
   final List<String> ingredients;
@@ -18,7 +18,7 @@ class Recipe {
   Recipe({
     required this.id,
     required this.name,
-    required this.category, // Changed to String
+    required this.category,
     required this.imageUrl,
     required this.description,
     required this.ingredients,
@@ -34,7 +34,7 @@ class Recipe {
   Recipe copyWith({
     String? id,
     String? name,
-    String? category, // Changed to String?
+    String? category,
     String? imageUrl,
     String? description,
     List<String>? ingredients,
@@ -49,7 +49,7 @@ class Recipe {
     return Recipe(
       id: id ?? this.id,
       name: name ?? this.name,
-      category: category ?? this.category, // Changed
+      category: category ?? this.category,
       imageUrl: imageUrl ?? this.imageUrl,
       description: description ?? this.description,
       ingredients: ingredients ?? this.ingredients,
@@ -67,7 +67,7 @@ class Recipe {
     return {
       'id': id,
       'name': name,
-      'category': category, // Changed to String
+      'category': category,
       'imageUrl': imageUrl,
       'description': description,
       'ingredients': ingredients,
@@ -81,11 +81,12 @@ class Recipe {
     };
   }
 
+  // For Firestore (with documentId)
   factory Recipe.fromMap(Map<String, dynamic> map, String documentId) {
     return Recipe(
       id: documentId,
       name: map['name'] ?? '',
-      category: map['category'] ?? '', // Changed
+      category: map['category'] ?? '',
       imageUrl: map['imageUrl'] ?? '',
       description: map['description'] ?? '',
       ingredients: List<String>.from(map['ingredients'] ?? []),
@@ -97,6 +98,43 @@ class Recipe {
       culturalContext: map['culturalContext'] ?? '',
       videoUrl: map['videoUrl'] ?? '',
     );
+  }
+
+  // For local storage (SharedPreferences, etc.)
+  factory Recipe.fromJson(Map<String, dynamic> json) {
+    return Recipe(
+      id: json['id'] ?? '',
+      name: json['name'] ?? '',
+      category: json['category'] ?? '',
+      imageUrl: json['imageUrl'] ?? '',
+      description: json['description'] ?? '',
+      ingredients: List<String>.from(json['ingredients'] ?? []),
+      instructions: List<String>.from(json['instructions'] ?? []),
+      cookingTimeMinutes: json['cookingTimeMinutes'] ?? 0,
+      difficulty: json['difficulty'] ?? 'Medium',
+      isFasting: json['isFasting'] ?? false,
+      isFavorite: json['isFavorite'] ?? false,
+      culturalContext: json['culturalContext'] ?? '',
+      videoUrl: json['videoUrl'] ?? '',
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'name': name,
+      'category': category,
+      'imageUrl': imageUrl,
+      'description': description,
+      'ingredients': ingredients,
+      'instructions': instructions,
+      'cookingTimeMinutes': cookingTimeMinutes,
+      'difficulty': difficulty,
+      'isFasting': isFasting,
+      'isFavorite': isFavorite,
+      'culturalContext': culturalContext,
+      'videoUrl': videoUrl,
+    };
   }
 
   @override
@@ -111,7 +149,7 @@ class Recipe {
           runtimeType == other.runtimeType &&
           id == other.id &&
           name == other.name &&
-          category == other.category && // Changed
+          category == other.category &&
           imageUrl == other.imageUrl &&
           description == other.description &&
           listEquals(ingredients, other.ingredients) &&
@@ -127,7 +165,7 @@ class Recipe {
   int get hashCode =>
       id.hashCode ^
       name.hashCode ^
-      category.hashCode ^ // Changed
+      category.hashCode ^
       imageUrl.hashCode ^
       description.hashCode ^
       ingredients.hashCode ^
@@ -139,4 +177,3 @@ class Recipe {
       culturalContext.hashCode ^
       videoUrl.hashCode;
 }
-
