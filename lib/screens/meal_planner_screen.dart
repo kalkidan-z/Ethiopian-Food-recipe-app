@@ -1,9 +1,11 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/widgets/bottom_nav_bar.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:flutter_application_1/models/recipe.dart';
 import 'package:flutter_application_1/services/recipe_service.dart';
 import 'package:flutter_application_1/screens/recipe_detail_screen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class MealPlannerScreen extends StatefulWidget {
   const MealPlannerScreen({super.key});
@@ -17,8 +19,43 @@ class _MealPlannerScreenState extends State<MealPlannerScreen> {
   DateTime _selectedDay = DateTime.now();
   DateTime _focusedDay = DateTime.now();
   CalendarFormat _calendarFormat = CalendarFormat.week;
-  // This would be replaced with a proper meal plan service
-  final Map<DateTime, List<Recipe>> _mealPlans = {};
+  final Map<String, List<Recipe>> _mealPlans = {}; // Use String keys
+
+  @override
+  void initState() {
+    super.initState();
+    _loadMealPlans();
+  }
+
+  // Helper to create a consistent date key string
+  String _dateKey(DateTime date) =>
+      '${date.year.toString().padLeft(4, '0')}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
+
+  /// Loads meal plans from SharedPreferences.
+  Future<void> _loadMealPlans() async {
+    final prefs = await SharedPreferences.getInstance();
+    final mealPlansString = prefs.getString('mealPlans');
+    if (mealPlansString != null) {
+      final decoded = jsonDecode(mealPlansString) as Map<String, dynamic>;
+      setState(() {
+        _mealPlans.clear();
+        decoded.forEach((dateString, recipesJson) {
+          final recipes = (recipesJson as List)
+              .map((r) => Recipe.fromJson(r as Map<String, dynamic>)) // Cast r to Map<String, dynamic>
+              .toList();
+          _mealPlans[dateString] = recipes;
+        });
+      });
+    }
+  }
+
+  /// Saves meal plans to SharedPreferences.
+  Future<void> _saveMealPlans() async {
+    final prefs = await SharedPreferences.getInstance();
+    final encoded = _mealPlans.map((date, recipes) =>
+        MapEntry(date, recipes.map((r) => r.toJson()).toList()));
+    await prefs.setString('mealPlans', jsonEncode(encoded));
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -94,8 +131,9 @@ class _MealPlannerScreenState extends State<MealPlannerScreen> {
     );
   }
 
+  /// Builds the list of meals for the selected day.
   Widget _buildMealList() {
-    final key = DateTime(_selectedDay.year, _selectedDay.month, _selectedDay.day);
+    final key = _dateKey(_selectedDay);
     final meals = _mealPlans[key] ?? [];
 
     if (meals.isEmpty) {
@@ -137,7 +175,7 @@ class _MealPlannerScreenState extends State<MealPlannerScreen> {
               fit: BoxFit.cover,
               errorBuilder: (context, error, stackTrace) {
                 return Image.asset(
-                  'assets/images/placeholder.jpg',
+                  'assets/images/placeholder.jpg', // Ensure you have a placeholder image
                   width: 60,
                   height: 60,
                   fit: BoxFit.cover,
@@ -168,6 +206,7 @@ class _MealPlannerScreenState extends State<MealPlannerScreen> {
     );
   }
 
+  /// Shows a dialog to add a meal from available recipes.
   void _showAddMealDialog() async {
     final recipes = await _recipeService.getRecipes().first;
 
@@ -195,7 +234,7 @@ class _MealPlannerScreenState extends State<MealPlannerScreen> {
                       fit: BoxFit.cover,
                       errorBuilder: (context, error, stackTrace) {
                         return Image.asset(
-                          'assets/images/placeholder.jpg',
+                          'assets/images/placeholder.jpg', // Ensure you have a placeholder image
                           width: 40,
                           height: 40,
                           fit: BoxFit.cover,
@@ -204,7 +243,7 @@ class _MealPlannerScreenState extends State<MealPlannerScreen> {
                     ),
                   ),
                   title: Text(recipe.name),
-                  subtitle: Text(recipe.category), // Display category String
+                  subtitle: Text(recipe.category),
                   onTap: () {
                     _addMealToPlan(recipe);
                     Navigator.pop(context);
@@ -226,8 +265,9 @@ class _MealPlannerScreenState extends State<MealPlannerScreen> {
     );
   }
 
-  void _addMealToPlan(Recipe recipe) {
-    final key = DateTime(_selectedDay.year, _selectedDay.month, _selectedDay.day);
+  /// Adds a recipe to the meal plan for the selected day and saves it.
+  Future<void> _addMealToPlan(Recipe recipe) async {
+    final key = _dateKey(_selectedDay);
     setState(() {
       if (_mealPlans.containsKey(key)) {
         _mealPlans[key]!.add(recipe);
@@ -235,19 +275,22 @@ class _MealPlannerScreenState extends State<MealPlannerScreen> {
         _mealPlans[key] = [recipe];
       }
     });
+    await _saveMealPlans(); // Await saving to ensure persistence
   }
 
-  void _removeMeal(DateTime key, int index) {
+  /// Removes a meal from the plan for the selected day and saves it.
+  Future<void> _removeMeal(String key, int index) async {
     setState(() {
       _mealPlans[key]!.removeAt(index);
       if (_mealPlans[key]!.isEmpty) {
         _mealPlans.remove(key);
       }
     });
+    await _saveMealPlans(); // Await saving to ensure persistence
   }
 
+  /// Shows the shopping list based on planned meals.
   void _showShoppingList() {
-    // Generate shopping list from all planned meals
     final allIngredients = <String>{};
 
     for (var recipes in _mealPlans.values) {
@@ -285,7 +328,12 @@ class _MealPlannerScreenState extends State<MealPlannerScreen> {
                       IconButton(
                         icon: const Icon(Icons.share),
                         onPressed: () {
-                          // Share shopping list
+                          // Implement sharing functionality here
+                          // For example, using the 'share_plus' package:
+                          // Share.share('Your shopping list:\n${sortedIngredients.join('\n')}');
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Share functionality not implemented yet.')),
+                          );
                         },
                       ),
                     ],
@@ -306,9 +354,13 @@ class _MealPlannerScreenState extends State<MealPlannerScreen> {
                           itemBuilder: (context, index) {
                             return CheckboxListTile(
                               title: Text(sortedIngredients[index]),
-                              value: false,
+                              value: false, // This would ideally come from a state management solution
                               onChanged: (value) {
                                 // In a real app, you would track checked items
+                                // For now, it just shows a confirmation
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text('${sortedIngredients[index]} checked: $value')),
+                                );
                               },
                             );
                           },
@@ -322,4 +374,3 @@ class _MealPlannerScreenState extends State<MealPlannerScreen> {
     );
   }
 }
-
