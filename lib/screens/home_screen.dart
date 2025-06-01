@@ -2,8 +2,27 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'category_screen.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (FirebaseAuth.instance.currentUser == null) {
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) => const AuthOverlay(),
+        );
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -345,3 +364,12 @@ class _AuthOverlayState extends State<AuthOverlay> {
     );
   }
 }
+                    
+                    
+               
+                  
+
+  
+       
+ 
+                    
