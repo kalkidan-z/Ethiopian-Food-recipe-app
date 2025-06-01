@@ -71,4 +71,14 @@ pubspec.yaml
 - Built with [Flutter](https://flutter.dev/)
 - Uses [Firebase](https://firebase.google.com/) for authentication and data storage
 
+  
+## Demo Video
+
+You can watch a demo of the app here: [Mesob Recipes App Demo]( https://youtu.be/Cl0kt8HzLp4
+)
+## **Project Status** 
+**This project is currently under active development.** Features may be incomplete, and images might not be loaded correctly. We appreciate your patience as we continue to build and improve!
+---
+
+
 Enjoy cooking with Mesob Recipes!
